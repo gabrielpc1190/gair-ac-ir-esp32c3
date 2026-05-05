@@ -1,5 +1,9 @@
 # GAir AC IR controller — production firmware
 # 16 buttons using transmit_raw with bit-perfect captures from the physical remote.
+# Coverage: ON/OFF, Cool 24/25/26°C × Fan LOW/MID/HIGH (+ Cool 25 Fan AUTO),
+#           Fan-only LOW/HIGH, LCD toggle, Swing toggle.
+# NOT included: Cool 17-23/27-30°C, Heat/Dry/Auto modes, Turbo/Sleep/Timer.
+# Add your own captures via firmware/gair-ir-capture.yaml + docs/03-capture-workflow.md.
 #
 # DOCS: https://github.com/<your-fork>/gair-ac-esp32c3/blob/main/docs/02-the-fix.md
 # LICENSE: MIT

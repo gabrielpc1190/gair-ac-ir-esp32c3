@@ -2,7 +2,20 @@
 
 ## `captures.json`
 
-Master file with 16 verified GAir captures from a physical mini-split remote (Casa GADI installation, captured 2026-05-05).
+Master file with **16 verified GAir captures** from a physical mini-split remote (Casa GADI installation, captured 2026-05-05).
+
+**Important — coverage is partial.** This file does not contain every possible Cool temperature × Fan speed combination. The captured set covers daily-use buttons:
+
+| Group | Captured |
+|---|---|
+| Power | ON (Cool 25°C Fan HIGH), OFF |
+| Fan-only mode | LOW, HIGH (no MID/AUTO) |
+| Cool 24°C | Fan LOW, MID, HIGH (no AUTO) |
+| Cool 25°C | Fan AUTO, LOW, MID, HIGH |
+| Cool 26°C | Fan LOW, MID, HIGH (no AUTO) |
+| Toggles | LCD, Swing |
+
+Not captured: temperatures **17–23°C**, **27–30°C**, Heat mode, Dry mode, Auto mode, Turbo, Sleep, Timer. If you need any of these, capture them yourself from your remote (see [docs/03-capture-workflow.md](../docs/03-capture-workflow.md)) — takes ~2 minutes per button.
 
 Each entry has:
 - `label`: Human-friendly button name

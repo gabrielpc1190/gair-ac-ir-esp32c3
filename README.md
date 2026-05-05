@@ -20,7 +20,27 @@ Before:
 After:
 - ✅ Single short acknowledgment beep, identical to physical remote
 - ✅ 100% reliable execution
-- ✅ Works for ON, OFF, all temperature × fan speed combinations, LCD toggle, Swing
+- ✅ Works for the 16 captures included (see [Coverage](#coverage) below) — any others are easy to add via the capture workflow
+
+## Coverage
+
+The bundled `codes/captures.json` contains **16 verified GAir buttons** — the temps + fan speeds we use day-to-day. **It does NOT cover every possible Cool temp × Fan speed combination**. Add more by following [`docs/03-capture-workflow.md`](docs/03-capture-workflow.md).
+
+| Function | Status |
+|---|---|
+| POWER ON (Cool 25°C Fan HIGH) | ✅ |
+| POWER OFF | ✅ |
+| Fan-only mode (LOW, HIGH) | ✅ MID & AUTO not captured |
+| Cool **24°C** with Fan LOW / MID / HIGH | ✅ AUTO not captured |
+| Cool **25°C** with Fan AUTO / LOW / MID / HIGH | ✅ all four |
+| Cool **26°C** with Fan LOW / MID / HIGH | ✅ AUTO not captured |
+| Cool 17–23°C, 27–30°C (any fan) | ❌ not captured |
+| LCD toggle (display on/off) | ✅ |
+| Swing toggle (vertical) | ✅ |
+| Heat mode, Dry mode, Auto mode | ❌ not captured |
+| Turbo, Sleep, Timer | ❌ not captured |
+
+If your AC accepts the included captures cleanly (short beep), the bit-perfect-replay technique is confirmed for your unit. You can then capture additional temps/modes from your remote in minutes per button and add them to the same JSON schema.
 
 ## Repo contents
 
