@@ -1,0 +1,29 @@
+# ESPHome build artifacts
+.esphome/
+.platformio/
+*.bin
+*.elf
+*.factory.bin
+*.ota.bin
+
+# Secrets — NEVER commit
+secrets.yaml
+firmware/secrets.yaml
+*.token
+.env
+
+# Personal capture extracts (the master codes/captures.json IS committed; these working files are not)
+_*.json
+_*.log
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store

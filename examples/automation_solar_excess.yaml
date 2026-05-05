@@ -1,0 +1,62 @@
+# Example Home Assistant automation: turn AC ON only when there's solar excess
+# (PV power > house load). Useful for offgrid setups where running AC during
+# midday solar hours prevents draining the battery.
+
+- alias: "Bedroom AC: solar-excess gate"
+  description: "Turn ON bedroom AC only when solar production exceeds house load by 1kW (allows comfortable AC operation 'for free')."
+  triggers:
+    - trigger: numeric_state
+      entity_id: sensor.solar_pv_power_w
+      above: 4000
+      for:
+        minutes: 5
+    - trigger: numeric_state
+      entity_id: binary_sensor.someone_home
+      to: "on"
+  conditions:
+    - condition: time
+      after: "08:00:00"
+      before: "16:00:00"
+    - condition: state
+      entity_id: input_boolean.modo_ahorro
+      state: "off"
+    - condition: template
+      value_template: >
+        {% set pv = states('sensor.solar_pv_power_w') | float(0) %}
+        {% set load = states('sensor.house_load_w') | float(0) %}
+        {{ pv - load > 1000 }}
+    - condition: state
+      entity_id: switch.ac_bedroom
+      state: "off"
+  actions:
+    - service: button.press
+      target:
+        # Choose temp/fan based on time of day or weather
+        entity_id: button.gair_ir_on_cool_25_fan_high
+  mode: single
+  max_exceeded: silent
+
+- alias: "Bedroom AC: turn off when solar drops"
+  description: "Turn off AC if solar excess drops for 10+ minutes."
+  triggers:
+    - trigger: numeric_state
+      entity_id: sensor.solar_pv_power_w
+      below: 3000
+      for:
+        minutes: 10
+  conditions:
+    - condition: state
+      entity_id: switch.ac_bedroom
+      state: "on"
+    # Only auto-turn-off if we auto-turned-on (avoid overriding manual ON)
+    - condition: state
+      entity_id: input_boolean.ac_auto_on
+      state: "on"
+  actions:
+    - service: button.press
+      target:
+        entity_id: button.gair_ir_off
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.ac_auto_on
+  mode: single

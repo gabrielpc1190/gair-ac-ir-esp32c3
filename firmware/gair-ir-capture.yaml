@@ -1,0 +1,173 @@
+# GAir AC IR — capture firmware
+# Use this firmware to capture IR codes from your physical AC remote into ESP RAM,
+# then dump them to Home Assistant via events for inclusion in the production firmware.
+#
+# Workflow:
+# 1. Flash this firmware to your ESP32-C3
+# 2. In Home Assistant, switch on `switch.<your_esp>_capture_mode`
+# 3. Aim physical remote at the ESP, press the desired button 5-10 times
+# 4. Switch off capture_mode
+# 5. Press button.<your_esp>_dump_captures to emit timings as `esphome.cap_slot` events
+# 6. Use tools/extract_captures.py to save the captures to JSON
+# 7. Use tools/decode_coolix.py to verify which slot has the desired hex code
+# 8. Embed verified timings into firmware/gair-ir.yaml as transmit_raw.code
+#
+# See docs/03-capture-workflow.md for detailed instructions.
+
+substitutions:
+  name: "gair-ir-capture"
+  friendly_name: "GAir IR Capture"
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+esp32:
+  board: seeed_xiao_esp32c3
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      CONFIG_BT_ENABLED: n
+      CONFIG_BT_BLUEDROID_ENABLED: n
+      CONFIG_BT_NIMBLE_ENABLED: n
+      CONFIG_BT_CONTROLLER_ENABLED: n
+      CONFIG_LWIP_IPV6: n
+
+logger:
+  baud_rate: 115200
+  level: INFO
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  use_address: 192.168.1.100   # ← change to your ESP IP
+  power_save_mode: NONE
+  ap:
+    ssid: "GAir-Capture Hotspot"
+    password: !secret fallback_ap_password
+
+light:
+  - platform: status_led
+    name: "Status LED"
+    pin: GPIO7
+    id: system_led
+
+# === Capture-to-RAM globals ===
+globals:
+  - id: capture_active
+    type: bool
+    initial_value: 'false'
+    restore_value: false
+  - id: capture_count
+    type: int
+    initial_value: '0'
+    restore_value: false
+  - id: capture_buffer
+    type: std::string[10]   # 10 capture slots, ~1KB CSV each = 10KB total RAM
+    restore_value: false
+
+# === IR receiver with capture-to-RAM callback ===
+remote_receiver:
+  id: rcvr
+  pin:
+    number: GPIO4
+    inverted: true
+    mode:
+      input: true
+      pullup: true
+  idle: 25ms
+  tolerance: 30%
+  on_raw:
+    then:
+      - if:
+          condition:
+            lambda: 'return id(capture_active);'
+          then:
+            - lambda: |-
+                if (x.size() < 30) return;
+                if (id(capture_count) >= 10) {
+                  id(capture_active) = false;
+                  ESP_LOGW("CAP", "Buffer full (10 slots) — auto-disabling capture");
+                  return;
+                }
+                std::string s;
+                s.reserve(x.size() * 7);
+                for (auto t : x) {
+                  char b[12];
+                  snprintf(b, sizeof(b), "%d,", t);
+                  s += b;
+                }
+                id(capture_buffer)[id(capture_count)] = s;
+                id(capture_count) += 1;
+                ESP_LOGW("CAP", "Stored capture %d/10 (n=%u timings)",
+                         id(capture_count), (unsigned)x.size());
+
+# Optional IR transmitter — useful for replay testing right from the capture firmware
+# (test a single capture before committing to production firmware).
+remote_transmitter:
+  id: tx
+  pin: GPIO3
+  carrier_duty_percent: 50%
+  non_blocking: false
+
+script:
+  - id: feedback_visual
+    mode: single
+    then:
+      - light.turn_off: system_led
+      - delay: 100ms
+      - light.turn_on: system_led
+
+# === Capture mode switch + count sensor ===
+switch:
+  - platform: template
+    name: "Capture mode"
+    id: switch_capture
+    icon: mdi:record-rec
+    optimistic: true
+    turn_on_action:
+      - lambda: |-
+          id(capture_count) = 0;
+          for (int i = 0; i < 10; i++) id(capture_buffer)[i] = "";
+          id(capture_active) = true;
+      - logger.log:
+          format: "CAPTURE armed — aim physical remote at ESP and press buttons"
+          level: WARN
+    turn_off_action:
+      - lambda: 'id(capture_active) = false;'
+
+sensor:
+  - platform: template
+    name: "Capture count"
+    id: sensor_count
+    update_interval: 2s
+    accuracy_decimals: 0
+    lambda: 'return id(capture_count);'
+
+button:
+  # === Dump captures via Home Assistant events ===
+  # Emits 10 events (esphome.cap_slot) with slot index and CSV timings.
+  # Subscribed to via tools/extract_captures.py.
+  - platform: template
+    name: "Dump captures"
+    id: btn_dump
+    icon: mdi:database-arrow-up
+    on_press:
+      - repeat:
+          count: 10
+          then:
+            - homeassistant.event:
+                event: esphome.cap_slot
+                data:
+                  slot: !lambda 'return std::to_string(iteration);'
+                  count: !lambda 'return std::to_string(id(capture_count));'
+                  data: !lambda 'return id(capture_buffer)[iteration];'
+            - delay: 80ms

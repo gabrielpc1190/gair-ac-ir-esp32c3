@@ -1,0 +1,25 @@
+# Example template switch for /config/templates.yaml on Home Assistant.
+#
+# This wraps the ESP's separate ON / OFF buttons into a single toggleable switch
+# that follows AC actual state (read from a power sensor).
+#
+# Add to your existing /config/templates.yaml under the `switch:` list:
+
+switch:
+  - name: "AC Bedroom"
+    unique_id: ac_bedroom_switch
+    icon: mdi:air-conditioner
+    # Read state from a power sensor (e.g. Shelly PM clamping the AC line).
+    # >30W means the AC is actually drawing power → reflects real state.
+    state: "{{ states('sensor.bedroom_ac_real_power') | float(0) > 30 }}"
+    turn_on:
+      - service: button.press
+        target:
+          entity_id: button.gair_ir_on_cool_25_fan_high
+    turn_off:
+      - service: button.press
+        target:
+          entity_id: button.gair_ir_off
+
+# After adding, reload templates:
+#   service: template.reload

@@ -1,0 +1,60 @@
+# Example Home Assistant Lovelace dashboard card for the GAir IR controller.
+# Copy this into a card on any view (Dashboard → Edit dashboard → Add card → Manual).
+#
+# Assumes your ESP is named "gair-ir" and produces these entities:
+#   button.gair_ir_<button_name>  (e.g. button.gair_ir_on_cool_25_fan_high)
+#   switch.ac_room                (template switch from /config/templates.yaml — see below)
+#
+# Adjust prefix to match your actual ESP name.
+
+type: entities
+title: "Bedroom AC"
+state_color: true
+entities:
+  - entity: sensor.gair_ir_real_power     # If you have a Shelly or other power meter
+    name: "Power consumption"
+  - type: divider
+  - entity: switch.ac_bedroom              # Optional: template switch wrapping ON/OFF
+    name: "AC ON/OFF"
+  - type: section
+    label: "Power"
+  - entity: button.gair_ir_on_cool_25_fan_high
+    name: "ON Cool 25 HIGH"
+    icon: "mdi:power"
+  - entity: button.gair_ir_off
+    name: "OFF"
+    icon: "mdi:power-off"
+  - type: section
+    label: "Cool mode"
+  - entity: button.gair_ir_cool_24_fan_low
+    name: "Cool 24 LOW"
+  - entity: button.gair_ir_cool_24_fan_mid
+    name: "Cool 24 MID"
+  - entity: button.gair_ir_cool_24_fan_high
+    name: "Cool 24 HIGH"
+  - entity: button.gair_ir_cool_25_fan_auto
+    name: "Cool 25 AUTO"
+  - entity: button.gair_ir_cool_25_fan_low
+    name: "Cool 25 LOW"
+  - entity: button.gair_ir_cool_25_fan_mid
+    name: "Cool 25 MID"
+  - entity: button.gair_ir_cool_25_fan_high
+    name: "Cool 25 HIGH"
+  - entity: button.gair_ir_cool_26_fan_low
+    name: "Cool 26 LOW"
+  - entity: button.gair_ir_cool_26_fan_mid
+    name: "Cool 26 MID"
+  - entity: button.gair_ir_cool_26_fan_high
+    name: "Cool 26 HIGH"
+  - type: section
+    label: "Fan-only mode (no compressor)"
+  - entity: button.gair_ir_fan_only_low
+    name: "Fan Only LOW"
+  - entity: button.gair_ir_fan_only_high
+    name: "Fan Only HIGH"
+  - type: section
+    label: "Toggles"
+  - entity: button.gair_ir_lcd_toggle
+    name: "Display ON/OFF"
+  - entity: button.gair_ir_swing_toggle
+    name: "Swing ON/OFF"
