@@ -10,8 +10,14 @@ switch:
     unique_id: ac_bedroom_switch
     icon: mdi:air-conditioner
     # Read state from a power sensor (e.g. Shelly PM clamping the AC line).
-    # >30W means the AC is actually drawing power → reflects real state.
-    state: "{{ states('sensor.bedroom_ac_real_power') | float(0) > 30 }}"
+    # Threshold band on a GAir mini-split:
+    #   ~5 W   = standby (IR receiver + MCU when "off")
+    #   ~25 W  = Fan-only LOW
+    #   ~40 W  = Fan-only HIGH
+    #   >800 W = compressor running (any Cool mode)
+    # 15 W cleanly separates standby from any active mode (including fan-only).
+    # If you set >30 the switch will report "off" while the AC runs in fan-only.
+    state: "{{ states('sensor.bedroom_ac_real_power') | float(0) > 15 }}"
     turn_on:
       - service: button.press
         target:

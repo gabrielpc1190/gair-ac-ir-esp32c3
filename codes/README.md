@@ -55,6 +55,20 @@ If your AC is a GAir or close-variant Coolix model:
 3. Listen — the AC should respond with **a single short beep** identical to your physical remote's beep
 4. If you hear **a long two-toned beep**, your AC is a different Coolix variant and you'll need to capture your own. See [`docs/03-capture-workflow.md`](../docs/03-capture-workflow.md).
 
+## Empirical validation
+
+Beyond the hex match against the IRremoteESP8266 reference table (`verified_against_expected: true`), the codes were validated against a live unit by pressing each button via Home Assistant and observing the Shelly PM clamping the AC line:
+
+| Button | Pre (W) | Post (W) | Outcome |
+|---|---|---|---|
+| `power_off` | any | ~5 | Compressor + fan stop, single short beep |
+| `cool_25_fan_high` (also POWER ON) | ~5 | >800 | Compressor engages, single short beep |
+| `fan_only_low` | ~5 | ~25 | Fan only, no compressor |
+| `fan_only_high` | ~25 | ~40 | Fan speed up, no compressor |
+| `cool_24/25/26 × low/mid/high` | varies | >800 | Compressor, fan tracks selected speed |
+
+The audible cue ("single short beep" identical to the physical remote, vs. the long two-toned warning beep produced by `transmit_pronto`) is the primary signal that the timings are bit-perfect — the power-draw delta is the secondary signal that the AC actually changed mode rather than just acknowledging the frame.
+
 ## Compatibility notes
 
 These captures are confirmed working on:
