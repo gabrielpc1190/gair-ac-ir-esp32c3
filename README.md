@@ -86,6 +86,11 @@ If your AC is a different model/variant:
 
 This work was done while debugging IR control of 4 GAir ACs in a residential offgrid solar+battery installation (Casa GADI, 2026). After multiple sessions chasing hardware/EMI/lockout hypotheses (all wrong), the breakthrough on 2026-05-05 identified pronto quantization as the root cause. Documented exhaustively to save others the same path.
 
+
+## Sister project
+
+For reading the **BlueSun lithium bank** (4×280 Ah LiFePO4) from the same off-grid install via Home Assistant, see [BlueSun-BMS-ESP32-S3-Panel](https://github.com/gabrielpc1190/BlueSun-BMS-ESP32-S3-Panel) — ESP32-S3 with a 4" 480×480 touchscreen running an LVGL UI + Octopus BMS BLE proxy that publishes 86 sensors to HA.
+
 ## License
 
 MIT — use freely. Attribution appreciated but not required.
