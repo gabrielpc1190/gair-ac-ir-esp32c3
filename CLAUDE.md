@@ -6,6 +6,8 @@ production: false
 status: active
 stack: [esphome, esp32]
 repo: "git@github.com:gabrielpc1190/gair-ac-ir-esp32c3.git"
+tags: [gadi, domotica, firmware]
+related: [HomeAssistant, bluesun-bms-esp32s3-panel]
 ---
 
 # CLAUDE.md — gair-ac-esp32c3
