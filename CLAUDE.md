@@ -1,7 +1,7 @@
 ---
 type: project
 title: gair-ac-esp32c3
-description: "Firmware ESPHome (ESP32-C3) para control IR de aires acondicionados GAir (variante Coolix), 16 botones expuestos a HA."
+description: "Firmware ESPHome para control IR de A/C GAir, expuesto a HA."
 production: false
 status: active
 stack: [esphome, esp32]
